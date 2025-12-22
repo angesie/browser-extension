@@ -1,0 +1,37 @@
+{
+  "manifest_version": 3,
+  "name": "Prompt Monitoring Extension",
+  "version": "1.0.0",
+  "description": "Monitors ChatGPT prompts, detects and anonymizes email addresses, and keeps history of issues.",
+  "action": {
+    "default_title": "Prompt Monitor",
+    "default_popup": "index.html"
+  },
+  "background": {
+    "service_worker": "serviceWorker.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://chatgpt.com/*",
+        "https://chat.openai.com/*"
+      ],
+      "js": ["contentScript.js"],
+      "run_at": "document_start"
+    }
+  ],
+  "permissions": [
+    "storage"
+  ],
+  "host_permissions": [
+    "https://chatgpt.com/*",
+    "https://chat.openai.com/*"
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["pageScript.js"],
+      "matches": ["https://chat.openai.com/*", "https://chatgpt.com/*"]
+    }
+  ]
+}

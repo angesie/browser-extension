@@ -1,0 +1,1 @@
+export const MESSAGE_SOURCE = "prompt-monitoring" as const;

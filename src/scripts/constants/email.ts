@@ -1,0 +1,1 @@
+export const EMAIL_PLACEHOLDER = "[EMAIL_ADDRESS]";
