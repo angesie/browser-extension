@@ -25,7 +25,7 @@ export default function HistoryTab() {
 
   if (loading) {
     return (
-      <Box sx={{display: "flex", justifyContent: "center" }}>
+      <Box sx={{ display: "flex", justifyContent: "center" }}>
         <CircularProgress size={22} />
       </Box>
     );
@@ -72,9 +72,17 @@ export default function HistoryTab() {
         {sorted.map((issue) => (
           <Paper key={issue.id} variant="outlined" sx={{ p: 1 }}>
             <Stack spacing={1}>
-              <IssueHeader createdAt={issue.createdAt} method={issue.method} url={issue.url} />
+              <IssueHeader
+                createdAt={issue.createdAt}
+                method={issue.method}
+                url={issue.url}
+              />
 
-              <EmailTable emails={issue.emails ?? []} isDismissedUntil={isDismissedUntil} onDismiss={dismissEmail} />
+              <EmailTable
+                emails={issue.emails ?? []}
+                isDismissedUntil={isDismissedUntil}
+                onDismiss={dismissEmail}
+              />
             </Stack>
           </Paper>
         ))}

@@ -8,7 +8,11 @@ type Props = {
   url?: string | null;
 };
 
-export default function IssueHeader({ createdAt, method, url }: Props): ReactElement {
+export default function IssueHeader({
+  createdAt,
+  method,
+  url,
+}: Props): ReactElement {
   return (
     <Typography variant="caption" color="text.secondary">
       {formatDateDMY(createdAt)} • {method} • {url}

@@ -15,8 +15,12 @@ function sendToServiceWorker<TResponse>(message: unknown): Promise<TResponse> {
   return new Promise((resolve, reject) => {
     chrome.runtime.sendMessage(message, (response: TResponse) => {
       const err = chrome.runtime.lastError;
-      if (err) reject(err);
-      else resolve(response);
+      if (err) {
+        console.error("[PromptMonitor:Content] runtime.lastError", err);
+        reject(err);
+      } else {
+        resolve(response);
+      }
     });
   });
 }
@@ -35,7 +39,6 @@ window.addEventListener("message", async (event: MessageEvent) => {
 
   try {
     const sanitizedBodyText = await sendToServiceWorker<string>(data);
-
     const responseMsg: ScanResponseMessage = {
       source: MESSAGE_SOURCE,
       kind: MessageKind.ScanResponse,
@@ -51,6 +54,10 @@ window.addEventListener("message", async (event: MessageEvent) => {
       id: data.id,
       sanitizedBodyText: data.bodyText,
     };
+    console.warn(
+      "[PromptMonitor:Content] failed to contact service worker, returning original bodyText",
+      { id: data.id },
+    );
     window.postMessage(responseMsg, "*");
   }
 });

@@ -18,7 +18,6 @@ export async function requestSanitizedBody(args: {
 }): Promise<string> {
   const id = crypto.randomUUID();
   const timeoutMs = args.timeoutMs ?? DEFAULT_TIMEOUT_MS;
-
   const msg: ScanRequestMessage = {
     source: MESSAGE_SOURCE,
     kind: MessageKind.ScanRequest,
@@ -38,6 +37,10 @@ export async function requestSanitizedBody(args: {
     window.setTimeout(() => {
       if (pending.has(id)) {
         pending.delete(id);
+        console.warn(
+          "[PromptMonitor:Page] request timed out, returning original bodyText",
+          { id },
+        );
         resolve(args.bodyText);
       }
     }, timeoutMs);

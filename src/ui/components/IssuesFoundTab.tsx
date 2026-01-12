@@ -4,11 +4,18 @@ import EmailTable from "./EmailTable";
 import ErrorPanel from "./ErrorPanel";
 
 export default function IssuesFoundTab() {
-  const { loading, error, latestIssue, dismissEmail, isDismissedUntil, refresh } = useIssues();
+  const {
+    loading,
+    error,
+    latestIssue,
+    dismissEmail,
+    isDismissedUntil,
+    refresh,
+  } = useIssues();
 
   if (loading) {
     return (
-      <Box sx={{  display: "flex", justifyContent: "center" }}>
+      <Box sx={{ display: "flex", justifyContent: "center" }}>
         <CircularProgress size={22} />
       </Box>
     );
@@ -37,7 +44,13 @@ export default function IssuesFoundTab() {
         Detected email addresses (latest):
       </Typography>
 
-      <EmailTable emails={emails} isDismissedUntil={isDismissedUntil} onDismiss={dismissEmail} />
+      <Box sx={{ p: 1 }}>
+        <EmailTable
+          emails={emails}
+          isDismissedUntil={isDismissedUntil}
+          onDismiss={dismissEmail}
+        />
+      </Box>
     </Stack>
   );
 }

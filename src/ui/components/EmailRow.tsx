@@ -9,10 +9,17 @@ type Props = {
   onDismiss(email: string): void | Promise<void>;
 };
 
-export default function EmailRow({ email, dismissed, until, onDismiss }: Props): ReactElement {
+export default function EmailRow({
+  email,
+  dismissed,
+  until,
+  onDismiss,
+}: Props): ReactElement {
   return (
     <TableRow key={email}>
-      <TableCell sx={{ maxWidth: 300, wordBreak: "break-all" }}>{email}</TableCell>
+      <TableCell sx={{ maxWidth: 300, wordBreak: "break-all" }}>
+        {email}
+      </TableCell>
       <TableCell>
         {dismissed ? (
           <Typography variant="caption" color="text.secondary">
@@ -24,7 +31,11 @@ export default function EmailRow({ email, dismissed, until, onDismiss }: Props):
       </TableCell>
       <TableCell align="right">
         {!dismissed ? (
-          <Button size="small" variant="contained" onClick={() => onDismiss(email)}>
+          <Button
+            size="small"
+            variant="contained"
+            onClick={() => onDismiss(email)}
+          >
             Dismiss 24h
           </Button>
         ) : (

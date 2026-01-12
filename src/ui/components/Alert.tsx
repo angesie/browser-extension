@@ -15,7 +15,9 @@ export default function Alert() {
   return (
     <Stack spacing={2}>
       <Stack direction="row" alignItems="center" justifyContent="space-between">
-        <Typography variant="h5">Prompt Monitoring Browser Extension</Typography>
+        <Typography variant="h5">
+          Prompt Monitoring Browser Extension
+        </Typography>
       </Stack>
 
       <Divider />

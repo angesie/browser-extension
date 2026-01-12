@@ -8,7 +8,10 @@ export default mergeConfig(
     build: {
       rollupOptions: {
         input: {
-          serviceWorker: resolve(process.cwd(), "src/scripts/background/serviceWorker.ts"),
+          serviceWorker: resolve(
+            process.cwd(),
+            "src/scripts/background/serviceWorker.ts",
+          ),
         },
         output: {
           format: "es",

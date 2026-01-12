@@ -8,7 +8,10 @@ export default mergeConfig(
     build: {
       rollupOptions: {
         input: {
-          contentScript: resolve(process.cwd(), "src/scripts/content/contentScript.ts"),
+          contentScript: resolve(
+            process.cwd(),
+            "src/scripts/content/contentScript.ts",
+          ),
         },
         output: {
           format: "iife",

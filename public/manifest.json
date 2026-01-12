@@ -13,21 +13,13 @@
   },
   "content_scripts": [
     {
-      "matches": [
-        "https://chatgpt.com/*",
-        "https://chat.openai.com/*"
-      ],
+      "matches": ["https://chatgpt.com/*", "https://chat.openai.com/*"],
       "js": ["contentScript.js"],
       "run_at": "document_start"
     }
   ],
-  "permissions": [
-    "storage"
-  ],
-  "host_permissions": [
-    "https://chatgpt.com/*",
-    "https://chat.openai.com/*"
-  ],
+  "permissions": ["storage"],
+  "host_permissions": ["https://chatgpt.com/*", "https://chat.openai.com/*"],
   "web_accessible_resources": [
     {
       "resources": ["pageScript.js"],

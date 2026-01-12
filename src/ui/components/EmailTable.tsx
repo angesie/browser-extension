@@ -1,4 +1,12 @@
-import { Table, TableHead, TableRow, TableCell, TableBody, TableContainer, Paper } from "@mui/material";
+import {
+  Table,
+  TableHead,
+  TableRow,
+  TableCell,
+  TableBody,
+  TableContainer,
+  Paper,
+} from "@mui/material";
 import type { ReactElement } from "react";
 import EmailRow from "./EmailRow";
 
@@ -10,10 +18,18 @@ type Props = {
   onDismiss(email: string): void | Promise<void>;
 };
 
-export default function EmailTable({ emails, isDismissedUntil, onDismiss }: Props): ReactElement {
+export default function EmailTable({
+  emails,
+  isDismissedUntil,
+  onDismiss,
+}: Props): ReactElement {
   return (
-    <TableContainer component={Paper} variant="outlined" sx={{ boxShadow: "none" }}>
-      <Table size="small">
+    <TableContainer
+      component={Paper}
+      variant="outlined"
+      sx={{ boxShadow: "none" }}
+    >
+      <Table size="small" sx={{ minWidth: 500 }}>
         <TableHead>
           <TableRow>
             <TableCell>Email</TableCell>

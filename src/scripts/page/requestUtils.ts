@@ -1,11 +1,13 @@
-
 export function normalizeUrl(input: RequestInfo | URL): string {
   if (typeof input === "string") return input;
   if (input instanceof URL) return input.toString();
   return input.url;
 }
 
-export function normalizeMethod(input: RequestInfo | URL, init?: RequestInit): string {
+export function normalizeMethod(
+  input: RequestInfo | URL,
+  init?: RequestInit,
+): string {
   if (init?.method) return init.method.toUpperCase();
   if (typeof input === "string" || input instanceof URL) return "GET";
   return (input.method || "GET").toUpperCase();
