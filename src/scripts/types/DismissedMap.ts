@@ -1,0 +1,1 @@
+export type DismissedMap = Record<string, number>;

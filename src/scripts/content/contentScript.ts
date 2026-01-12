@@ -2,7 +2,6 @@ import { MESSAGE_SOURCE } from "../../shared/constants/messageSource";
 import { MessageKind } from "../../shared/types/MessageKind";
 import type { ScanRequestMessage } from "../types/ScanRequestMessage";
 import type { ScanResponseMessage } from "../types/ScanResponseMessage";
-import type { ServiceWorkerScanResult } from "../types/ServiceWorkerScanReqult";
 
 function injectPageScript(): void {
   const script = document.createElement("script");
@@ -35,13 +34,13 @@ window.addEventListener("message", async (event: MessageEvent) => {
   if (typeof data.bodyText !== "string") return;
 
   try {
-    const swResult = await sendToServiceWorker<ServiceWorkerScanResult>(data);
+    const sanitizedBodyText = await sendToServiceWorker<string>(data);
 
     const responseMsg: ScanResponseMessage = {
       source: MESSAGE_SOURCE,
       kind: MessageKind.ScanResponse,
       id: data.id,
-      sanitizedBodyText: swResult?.sanitizedBodyText ?? data.bodyText,
+      sanitizedBodyText: sanitizedBodyText ?? data.bodyText,
     };
 
     window.postMessage(responseMsg, "*");

@@ -5,9 +5,6 @@ import { base } from "../vite.base.config";
 export default mergeConfig(
   base,
   defineConfig({
-    plugins: [react()],
-    build: {
-      emptyOutDir: true,
-    },
+    plugins: [react()]
   }),
 );
