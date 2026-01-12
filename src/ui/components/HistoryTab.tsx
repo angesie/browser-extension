@@ -39,7 +39,7 @@ export default function HistoryTab() {
         <Typography variant="body2" color="text.secondary">
           History is empty.
         </Typography>
-        <Button variant="outlined" onClick={refresh}>
+        <Button variant="contained" onClick={refresh} sx={{ alignSelf: "start" }}>
           Refresh
         </Button>
       </Stack>
