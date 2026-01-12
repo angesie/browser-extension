@@ -1,1 +1,2 @@
 export const EMAIL_PLACEHOLDER = "[EMAIL_ADDRESS]";
+export const DEFAULT_DISMISS_HOURS = 24;

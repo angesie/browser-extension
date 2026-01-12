@@ -1,22 +1,31 @@
 import { MESSAGE_SOURCE } from "../../shared/constants/messageSource";
 import type { Issue } from "../../shared/types/Issue";
 import { MessageKind } from "../../shared/types/MessageKind";
+import { DEFAULT_DISMISS_HOURS } from "../constants/email";
+import { POPUP_HEIGHT, POPUP_WIDTH } from "../constants/popup";
 import type { DismissedMap } from "../types/DismissedMap";
-import type { ScanRequestMessage } from "../types/ScanRequestMessage";
 import { StorageKey } from "../types/StorageKey";
 import { anonymize, appendIssue, clearExpiredDismissed, dismissEmail, findEmails, isDismissed, isFinalPostRequest } from "./serviceWorkerUtils";
 import { storageGet, storageSet } from "./storageUtils";
+import { ScanRequestSchema, DismissEmailSchema } from "./messageSchemas";
 
-chrome.runtime.onMessage.addListener((msg: any, _sender, sendResponse) => {
-  if (!msg || msg.source !== MESSAGE_SOURCE || !msg.kind) return;
+//eslint-disable-next-line @typescript-eslint/no-explicit-any
+chrome.runtime.onMessage.addListener((message: any, _sender, sendResponse) => {
+  if (!message || message.source !== MESSAGE_SOURCE || !message.kind) return;
 
   (async () => {
     await clearExpiredDismissed();
 
-    switch (msg.kind) {
+    switch (message.kind) {
       case MessageKind.ScanRequest: {
-        console.log("[PM] request intercepted by Service Worker " + msg.id);
-        const data = msg as ScanRequestMessage;
+        const parsed = ScanRequestSchema.safeParse(message);
+        if (!parsed.success) {
+          const bodyText = typeof (message as any)?.bodyText === "string" ? (message as any).bodyText : "";
+          sendResponse(bodyText);
+          return;
+        }
+
+        const data = parsed.data;
 
         const isFinal = isFinalPostRequest(data.bodyText);
 
@@ -37,23 +46,24 @@ chrome.runtime.onMessage.addListener((msg: any, _sender, sendResponse) => {
             url: data.url,
             method: data.method,
             isFinal,
-            emails: emailsFound.map((email) => {
-              return { email, isDismissed: isDismissed(email, dismissed) };
-            }),
+            emails: emailsFound,
           };
           await appendIssue(issue);
         }
 
         if (isFinal && emailsFound.some((e) => !isDismissed(e, dismissed))) {
           const url = chrome.runtime.getURL("index.html");
-
-          await chrome.windows.create({
-            url,
-            type: "popup",
-            width: 420,
-            height: 600,
-            focused: true,
-          });
+          try {
+            await chrome.windows.create({
+              url,
+              type: "popup",
+              width: POPUP_WIDTH,
+              height: POPUP_HEIGHT,
+              focused: true,
+            });
+          } catch (err) {
+            console.error("Failed to open popup window", err);
+          }
         }
 
         sendResponse(sanitizedBodyText);
@@ -61,9 +71,13 @@ chrome.runtime.onMessage.addListener((msg: any, _sender, sendResponse) => {
       }
 
       case MessageKind.DismissEmail: {
-        if (typeof msg.email === "string" && msg.email.trim()) {
-          await dismissEmail(msg.email, 24);
+        const parsed = DismissEmailSchema.safeParse(message);
+        if (!parsed.success) {
+          sendResponse({ ok: false, error: "invalid message" });
+          return;
         }
+
+        await dismissEmail(parsed.data.email, DEFAULT_DISMISS_HOURS);
         sendResponse({ ok: true });
         return;
       }
@@ -89,8 +103,8 @@ chrome.runtime.onMessage.addListener((msg: any, _sender, sendResponse) => {
         return;
     }
   })().catch(() => {
-    if (msg?.kind === MessageKind.ScanRequest) {
-      const bodyText = typeof msg?.bodyText === "string" ? msg.bodyText : "";
+    if (message?.kind === MessageKind.ScanRequest) {
+      const bodyText = typeof message?.bodyText === "string" ? message.bodyText : "";
       sendResponse(bodyText);
     } else {
       sendResponse({ ok: false });

@@ -6,7 +6,7 @@ function formatUntil(ts: number) {
 }
 
 export default function IssuesFoundTab() {
-  const { loading, error, latestIssue, dismissEmail, isDismissed, refresh } = useIssues();
+  const { loading, error, latestIssue, dismissEmail, isDismissedUntil, refresh } = useIssues();
 
   if (loading) {
     return (
@@ -48,7 +48,7 @@ export default function IssuesFoundTab() {
 
       <Stack spacing={1}>
         {emails.map((email) => {
-          const d = isDismissed(email);
+          const d = isDismissedUntil(email);
           return (
             <Box
               key={email}

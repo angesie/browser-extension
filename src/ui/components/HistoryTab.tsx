@@ -19,7 +19,7 @@ function formatUntil(ts: number) {
 }
 
 export default function HistoryTab() {
-  const { loading, error, issues, dismissEmail, isDismissed, refresh, clearHistory } = useIssues();
+  const { loading, error, issues, dismissEmail, isDismissedUntil, refresh, clearHistory } = useIssues();
 
   if (loading) {
     return (
@@ -71,7 +71,7 @@ export default function HistoryTab() {
 
             <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
               {(issue.emails ?? []).map((email) => {
-                const d = isDismissed(email);
+                const d = isDismissedUntil(email);
                 return (
                   <Stack key={`${issue.id}:${email}`} spacing={0.5}>
                     <Chip

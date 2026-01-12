@@ -1,17 +1,14 @@
 import type { Issue } from "../../shared/types/Issue";
+import { normalizeEmail } from "../../shared/utils";
 import { EMAIL_PLACEHOLDER } from "../constants/email";
 import { EMAIL_REGEX } from "../constants/regex";
 import type { DismissedMap } from "../types/DismissedMap";
 import { StorageKey } from "../types/StorageKey";
 import { storageGet, storageSet } from "./storageUtils";
 
-export function normalizeEmail(email: string): string {
-  return email.trim().toLowerCase();
-}
-
 export function isFinalPostRequest(bodyText: string): boolean {
   try {
-    const obj = JSON.parse(bodyText) as any;
+    const obj = JSON.parse(bodyText);
     if (obj && typeof obj === "object") {
       if ("partial_query" in obj) return false;
       if (obj.partial_query) return false;
@@ -32,7 +29,7 @@ export function anonymize(bodyText: string): string {
 }
 
 export function isDismissed(email: string, dismissed: DismissedMap): boolean {
-  return (dismissed[email] ?? 0) <= Date.now();
+  return (dismissed[normalizeEmail(email)] ?? 0) > Date.now();
 }
 
 export async function appendIssue(issue: Issue): Promise<void> {

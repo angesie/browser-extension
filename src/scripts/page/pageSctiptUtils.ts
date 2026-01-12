@@ -1,6 +1,7 @@
 import { MESSAGE_SOURCE } from "../../shared/constants/messageSource";
 import { MessageKind } from "../../shared/types/MessageKind";
 import { CHATGPT_URL_PATTERNS } from "../constants/regex";
+import { DEFAULT_TIMEOUT_MS } from "../constants/request";
 import type { ScanRequestMessage } from "../types/ScanRequestMessage";
 
 export const pending = new Map<string, (sanitized: string) => void>();
@@ -16,7 +17,7 @@ export async function requestSanitizedBody(args: {
   timeoutMs?: number;
 }): Promise<string> {
   const id = crypto.randomUUID();
-  const timeoutMs = args.timeoutMs ?? 1500;
+  const timeoutMs = args.timeoutMs ?? DEFAULT_TIMEOUT_MS;
 
   const msg: ScanRequestMessage = {
     source: MESSAGE_SOURCE,

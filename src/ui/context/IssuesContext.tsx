@@ -1,8 +1,15 @@
-import React, { createContext, useContext, useEffect, useMemo, useReducer } from "react";
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useReducer,
+} from "react";
 import { sendMessage } from "../lib/runtime";
 import { MESSAGE_SOURCE } from "../../shared/constants/messageSource";
 import { MessageKind } from "../../shared/types/MessageKind";
 import type { Issue } from "../../shared/types/Issue";
+import { normalizeEmail } from "../../shared/utils";
 
 type DismissedMap = Record<string, number>;
 
@@ -32,7 +39,12 @@ function reducer(state: State, action: Action): State {
     case "LOAD_START":
       return { ...state, loading: true, error: null };
     case "LOAD_SUCCESS":
-      return { loading: false, error: null, issues: action.issues, dismissed: action.dismissed };
+      return {
+        loading: false,
+        error: null,
+        issues: action.issues,
+        dismissed: action.dismissed,
+      };
     case "LOAD_ERROR":
       return { ...state, loading: false, error: action.error };
     case "SET_DISMISSED":
@@ -44,15 +56,15 @@ function reducer(state: State, action: Action): State {
   }
 }
 
-type Ctx = State & {
+type Context = State & {
   refresh(): Promise<void>;
   dismissEmail(email: string): Promise<void>;
   clearHistory(): Promise<void>;
   latestIssue: Issue | null;
-  isDismissed(email: string): { dismissed: boolean; until: number };
+  isDismissedUntil(email: string): { dismissed: boolean; until: number };
 };
 
-const IssuesContext = createContext<Ctx | null>(null);
+const IssuesContext = createContext<Context | null>(null);
 
 export function IssuesProvider({ children }: { children: React.ReactNode }) {
   const [state, dispatch] = useReducer(reducer, initialState);
@@ -68,9 +80,16 @@ export function IssuesProvider({ children }: { children: React.ReactNode }) {
         kind: MessageKind.GetHistory,
       });
 
-      dispatch({ type: "LOAD_SUCCESS", issues: res.issues ?? [], dismissed: res.dismissed ?? {} });
+      dispatch({
+        type: "LOAD_SUCCESS",
+        issues: res.issues ?? [],
+        dismissed: res.dismissed ?? {},
+      });
     } catch (e) {
-      dispatch({ type: "LOAD_ERROR", error: (e as Error)?.message ?? "Failed to load history" });
+      dispatch({
+        type: "LOAD_ERROR",
+        error: (e as Error)?.message ?? "Failed to load history",
+      });
     }
   };
 
@@ -88,7 +107,10 @@ export function IssuesProvider({ children }: { children: React.ReactNode }) {
   };
 
   const clearHistory = async () => {
-    await sendMessage<{ source: string; kind: typeof MessageKind.ClearHistory }, { ok: boolean }>({
+    await sendMessage<
+      { source: string; kind: typeof MessageKind.ClearHistory },
+      { ok: boolean }
+    >({
       source: MESSAGE_SOURCE,
       kind: MessageKind.ClearHistory,
     });
@@ -101,28 +123,36 @@ export function IssuesProvider({ children }: { children: React.ReactNode }) {
 
   const latestIssue = useMemo(() => {
     if (!state.issues.length) return null;
-    return [...state.issues].sort((a, b) => (b.createdAt ?? 0) - (a.createdAt ?? 0))[0] ?? null;
+    return (
+      state.issues.reduce(
+        (best, cur) =>
+          (cur.createdAt ?? 0) > (best.createdAt ?? 0) ? cur : best,
+        state.issues[0],
+      ) ?? null
+    );
   }, [state.issues]);
 
-  const isDismissed = (email: string) => {
-    const until = state.dismissed[email.toLowerCase()] ?? 0;
+  const isDismissedUntil = (email: string) => {
+    const until = state.dismissed[normalizeEmail(email)] ?? 0;
     return { dismissed: until > Date.now(), until };
   };
 
-  const value: Ctx = {
+  const value: Context = {
     ...state,
     refresh,
     dismissEmail,
     clearHistory,
     latestIssue,
-    isDismissed,
+    isDismissedUntil,
   };
 
-  return <IssuesContext.Provider value={value}>{children}</IssuesContext.Provider>;
+  return (
+    <IssuesContext.Provider value={value}>{children}</IssuesContext.Provider>
+  );
 }
 
 export function useIssues() {
-  const ctx = useContext(IssuesContext);
-  if (!ctx) throw new Error("useIssues must be used within IssuesProvider");
-  return ctx;
+  const context = useContext(IssuesContext);
+  if (!context) throw new Error("useIssues must be used within IssuesProvider");
+  return context;
 }
