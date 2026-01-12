@@ -28,3 +28,12 @@ export const ClearHistorySchema = z.object({
 });
 
 export type ScanRequest = z.infer<typeof ScanRequestSchema>;
+
+export const AnyMessageSchema = z.discriminatedUnion("kind", [
+  ScanRequestSchema,
+  DismissEmailSchema,
+  GetHistorySchema,
+  ClearHistorySchema,
+]);
+
+export type AnyMessage = z.infer<typeof AnyMessageSchema>;

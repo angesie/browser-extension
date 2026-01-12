@@ -7,25 +7,33 @@ import type { DismissedMap } from "../types/DismissedMap";
 import { StorageKey } from "../types/StorageKey";
 import { anonymize, appendIssue, clearExpiredDismissed, dismissEmail, findEmails, isDismissed, isFinalPostRequest } from "./serviceWorkerUtils";
 import { storageGet, storageSet } from "./storageUtils";
-import { ScanRequestSchema, DismissEmailSchema } from "./messageSchemas";
+import { AnyMessageSchema } from "./messageSchemas";
 
-//eslint-disable-next-line @typescript-eslint/no-explicit-any
-chrome.runtime.onMessage.addListener((message: any, _sender, sendResponse) => {
-  if (!message || message.source !== MESSAGE_SOURCE || !message.kind) return;
+chrome.runtime.onMessage.addListener((message: unknown, _sender, sendResponse) => {
+  const raw = message as Record<string, unknown> | undefined;
+  if (!raw || raw.source !== MESSAGE_SOURCE || !raw.kind) return;
 
   (async () => {
     await clearExpiredDismissed();
 
-    switch (message.kind) {
-      case MessageKind.ScanRequest: {
-        const parsed = ScanRequestSchema.safeParse(message);
-        if (!parsed.success) {
-          const bodyText = typeof (message as any)?.bodyText === "string" ? (message as any).bodyText : "";
-          sendResponse(bodyText);
-          return;
-        }
+    const parsed = AnyMessageSchema.safeParse(message);
+    if (!parsed.success) {
+      // Keep backward-compatible fallback for scan requests (so fetch doesn't break)
+      if (raw.kind === MessageKind.ScanRequest) {
+        const bodyText = typeof raw?.bodyText === "string" ? (raw.bodyText as string) : "";
+        sendResponse(bodyText);
+        return;
+      }
 
-        const data = parsed.data;
+      sendResponse({ ok: false, error: "invalid message" });
+      return;
+    }
+
+    const msg = parsed.data;
+
+    switch (msg.kind) {
+      case MessageKind.ScanRequest: {
+        const data = msg;
 
         const isFinal = isFinalPostRequest(data.bodyText);
 
@@ -34,10 +42,7 @@ chrome.runtime.onMessage.addListener((message: any, _sender, sendResponse) => {
           ? anonymize(data.bodyText)
           : data.bodyText;
 
-        const dismissed = await storageGet<DismissedMap>(
-          StorageKey.Dismissed,
-          {},
-        );
+        const dismissed = await storageGet<DismissedMap>(StorageKey.Dismissed, {});
 
         if (isFinal && emailsFound.length) {
           const issue: Issue = {
@@ -71,23 +76,14 @@ chrome.runtime.onMessage.addListener((message: any, _sender, sendResponse) => {
       }
 
       case MessageKind.DismissEmail: {
-        const parsed = DismissEmailSchema.safeParse(message);
-        if (!parsed.success) {
-          sendResponse({ ok: false, error: "invalid message" });
-          return;
-        }
-
-        await dismissEmail(parsed.data.email, DEFAULT_DISMISS_HOURS);
+        await dismissEmail(msg.email, DEFAULT_DISMISS_HOURS);
         sendResponse({ ok: true });
         return;
       }
 
       case MessageKind.GetHistory: {
         const issues = await storageGet<Issue[]>(StorageKey.Issues, []);
-        const dismissed = await storageGet<DismissedMap>(
-          StorageKey.Dismissed,
-          {},
-        );
+        const dismissed = await storageGet<DismissedMap>(StorageKey.Dismissed, {});
         sendResponse({ issues, dismissed });
         return;
       }
@@ -102,9 +98,10 @@ chrome.runtime.onMessage.addListener((message: any, _sender, sendResponse) => {
         sendResponse({ ok: false, error: "Unknown kind" });
         return;
     }
-  })().catch(() => {
-    if (message?.kind === MessageKind.ScanRequest) {
-      const bodyText = typeof message?.bodyText === "string" ? message.bodyText : "";
+  })().catch((err) => {
+    console.error("serviceWorker onMessage handler failed", err);
+    if (raw?.kind === MessageKind.ScanRequest) {
+      const bodyText = typeof raw?.bodyText === "string" ? (raw.bodyText as string) : "";
       sendResponse(bodyText);
     } else {
       sendResponse({ ok: false });
