@@ -9,9 +9,5 @@ export async function storageGet<T>(key: string, fallback: T): Promise<T> {
 }
 
 export async function storageSet<T>(key: string, value: T): Promise<void> {
-  try {
-    await chrome.storage.local.set({ [key]: value });
-  } catch (e) {
-    console.error("storageSet error", key, e);
-  }
+  await chrome.storage.local.set({ [key]: value });
 }
