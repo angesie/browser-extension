@@ -159,7 +159,6 @@ export function IssuesProvider({ children }: { children: React.ReactNode }) {
     [state.dismissed],
   );
 
-  // keep a ref to latest state to avoid stale closures in callbacks
   useEffect(() => {
     stateRef.current = state;
   }, [state]);

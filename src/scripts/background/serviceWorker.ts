@@ -27,7 +27,6 @@ chrome.runtime.onMessage.addListener(
 
       const parsed = AnyMessageSchema.safeParse(message);
       if (!parsed.success) {
-        // Keep backward-compatible fallback for scan requests (so fetch doesn't break)
         if (raw.kind === MessageKind.ScanRequest) {
           const bodyText =
             typeof raw?.bodyText === "string" ? (raw.bodyText as string) : "";

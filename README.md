@@ -1,73 +1,53 @@
-# React + TypeScript + Vite
+# Prompt Monitoring Browser Extension
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A small browser extension that scans ChatGPT user requests for email addresses, records findings, anonimizes the messages and notifies the user via a popup UI.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- Detects email addresses in ChatGPT request body text
+- Sanitizes and returns a sanitized body to the page
+- Stores detected issues and provides a small popup UI to review them
+- Dismissal logic to avoid repeat alerts for the same email
 
-## React Compiler
+## Quick Start
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Prerequisites:
 
-## Expanding the ESLint configuration
+- Node.js (18+) and npm
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+Install dependencies:
 
-```js
-export default defineConfig([
-  globalIgnores(["dist"]),
-  {
-    files: ["**/*.{ts,tsx}"],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ["./tsconfig.node.json", "./tsconfig.app.json"],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-]);
+```bash
+npm install
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Run the UI in development (hot-reload):
 
-```js
-// eslint.config.js
-import reactX from "eslint-plugin-react-x";
-import reactDom from "eslint-plugin-react-dom";
-
-export default defineConfig([
-  globalIgnores(["dist"]),
-  {
-    files: ["**/*.{ts,tsx}"],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs["recommended-typescript"],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ["./tsconfig.node.json", "./tsconfig.app.json"],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-]);
+```bash
+npm run dev
 ```
+
+Build for production (UI + extension bundles):
+
+```bash
+npm run build
+```
+
+Notes:
+
+- The extension is currently only available for Chromium-based browsers
+- The project provides several build scripts in `package.json` including `build:ui` and `build:backend` (which calls the content/page/background bundles). The top-level `build` script runs both.
+
+## Loading the Extension Locally
+
+1. Run `npm run build` to produce the production bundles.
+2. Open `chrome://extensions` (or the equivalent in Chromium-based browsers).
+3. Enable Developer Mode and click "Load unpacked".
+4. Select the built output directory (`dist`).
+
+## Project Layout (high level)
+
+- `src/scripts/` — service worker script, content script, page script
+- `src/shared/` — shared types, constants, and small utilities
+- `src/ui/` — React UI for the popup page
+- `config/` — Vite configuration files for each build target (`vite.ui.config.ts`, `vite.content.config.ts`, etc.)
