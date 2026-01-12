@@ -3,7 +3,7 @@ import type { Issue } from "../../shared/types/Issue";
 import { MessageKind } from "../../shared/types/MessageKind";
 import { DEFAULT_DISMISS_HOURS } from "../constants/email";
 import { POPUP_HEIGHT, POPUP_WIDTH } from "../constants/popup";
-import type { DismissedMap } from "../types/DismissedMap";
+import type { DismissedMap } from "../../shared/types/DismissedMap";
 import { StorageKey } from "../types/StorageKey";
 import { anonymize, appendIssue, clearExpiredDismissed, dismissEmail, findEmails, isDismissed, isFinalPostRequest } from "./serviceWorkerUtils";
 import { storageGet, storageSet } from "./storageUtils";

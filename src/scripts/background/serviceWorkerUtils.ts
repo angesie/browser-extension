@@ -3,7 +3,7 @@ import { normalizeEmail } from "../../shared/utils";
 import { DEFAULT_DISMISS_HOURS, EMAIL_PLACEHOLDER } from "../constants/email";
 import { EMAIL_REGEX } from "../constants/regex";
 import { DEFAULT_DELAY_MS, DEFAULT_RETRY_COUNT } from "../constants/request";
-import type { DismissedMap } from "../types/DismissedMap";
+import type { DismissedMap } from "../../shared/types/DismissedMap";
 import { StorageKey } from "../types/StorageKey";
 import { storageGet, storageSet } from "./storageUtils";
 
